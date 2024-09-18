@@ -34,10 +34,15 @@ The script will generate an image that simulates the appearance of a chat betwee
 You can customize the following properties in the Dialog2Img class:
 
 `$width`: Width of the generated image.
+
 `$height`: Height of the generated image.
+
 `$padding`: Padding around the edges of the image.
+
 `$font`: Path to the TTF font used for the text.
+
 `$fontSize`: Font size for the text.
+
 `$lineHeight`: Vertical spacing between messages.
 
 ## License
