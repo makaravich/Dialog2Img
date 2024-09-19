@@ -89,7 +89,7 @@ class Dialog_2_Img {
 
         // Generate random image name
         $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.png';
-        $filePath = '/img/' . $randomName;
+        $filePath = __DIR__ . '/img/' . $randomName;
 
         // Save image to file
         imagepng($this->image, $filePath);
