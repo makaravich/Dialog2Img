@@ -22,7 +22,7 @@ You can use the `Dialog2Img` class to create images from text-based dialogues as
 require_once 'Dialog2Img.php';
 
 $dialog = "Hello!\nHow are you?\n*Hello! Everything is fine, and you?\nEverything is great too!";
-$dialog2Img = new Dialog2Img();
+$dialog2Img = new Dialog_2_Img();
 $imagePath = $dialog2Img->create($dialog);
 echo "Image saved at: " . $imagePath;
 ?>

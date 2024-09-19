@@ -1,6 +1,13 @@
 <?php
 
-class Dialog2Img {
+/**
+ * It is a PHP class designed to generate images that simulate chat screenshots from a messenger.
+ * The class takes a text-based dialogue as input, where each message starts on a new line,
+ * and the other party's messages start with an asterisk (*).
+ * The output is an image with rounded-corner message bubbles styled for both users, saved with a unique file name.
+ */
+
+class Dialog_2_Img {
     private int $width = 400;
     private int $height = 600;
     private int $padding = 20;  // Message margins from edges
