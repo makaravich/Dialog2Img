@@ -145,4 +145,51 @@ class Dialog_2_Img {
         $wrappedText .= trim($line);
         return $wrappedText;
     }
+
+    /**
+     * Creates GIF animated dialog
+     *
+     * @param $dialog
+     * @return string
+     * @throws ImagickException
+     */
+    public function create_gif($dialog): string {
+        $imagick = new Imagick();
+        $imagick->setFormat('gif');
+
+        $lines = explode("\n", $dialog);
+        $messages = [];
+        foreach ($lines as $line) {
+            if (str_starts_with($line, '*')) {
+                $messages[] = ["user" => "other", "text" => trim(substr($line, 1))];
+            } else {
+                $messages[] = ["user" => "me", "text" => trim($line)];
+            }
+        }
+
+        // Generate intermediate frames
+        for ($i = 1; $i <= count($messages); $i++) {
+            $partialDialog = implode("\n", array_slice($lines, 0, $i));
+            $framePath = $this->create($partialDialog);
+
+            // Create frame for GIF
+            $frame = new Imagick($framePath);
+            $frame->setImageFormat('gif');
+            $frame->setImageDelay(100);  // Delay between frames
+            $imagick->addImage($frame);
+            unlink($framePath);  // Remove intermediate files
+        }
+
+        // Generate random file name
+        $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.gif';
+        $filePath = __DIR__ . '/img/' . $randomName;
+
+        // Save animation to file
+        $imagick->writeImages($filePath, true);
+        $imagick->clear();
+        $imagick->destroy();
+
+        return $filePath;  // Return the path to the created gif file
+    }
+
 }
