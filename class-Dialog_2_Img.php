@@ -187,7 +187,6 @@ class Dialog_2_Img {
 
                     // Add cursor (|) at the end while typing
                     $displayText = rtrim($currentText) . '|';
-                    file_put_contents('log.txt', $displayText . "\n", FILE_APPEND);
 
                     // Generate frame with the current state of the input box
                     $framePath = $this->create_with_input_box(implode("\n", array_slice($lines, 0, $i - 1)), $displayText, $inputBoxHeight);
