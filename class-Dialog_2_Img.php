@@ -8,13 +8,13 @@
  */
 
 class Dialog_2_Img {
-    private int $width = 400;
-    private int $height = 600;
-    private int $padding = 20;  // Message margins from edges
+    private int $width = 810;
+    private int $height = 1080;
+    private int $padding = 40;  // Message margins from edges
     private string $font;
-    private int $fontSize = 14;
-    private int $textPadding = 10;
-    private int $lineHeight = 20;  // distance between messages
+    private int $fontSize = 40;
+    private int $textPadding = 20;
+    private int $lineHeight = 30;  // distance between messages
     private $image;
     private int|false $myMessageColor;
     private int|false $otherMessageColor;
