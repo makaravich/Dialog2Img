@@ -8,13 +8,13 @@
  */
 
 class Dialog_2_Img {
-    private int $width = 400;
-    private int $height = 600;
-    private int $padding = 20;  // Message margins from edges
+    private int $width = 1080;
+    private int $height = 810;
+    private int $padding = 80;  // Message margins from edges
     private string $font;
-    private int $fontSize = 14;
-    private int $textPadding = 10;
-    private int $lineHeight = 20;  // distance between messages
+    private int $fontSize = 40;
+    private int $textPadding = 50;
+    private int $lineHeight = 50;  // distance between messages
     private $image;
     private int|false $myMessageColor;
     private int|false $otherMessageColor;
@@ -22,7 +22,7 @@ class Dialog_2_Img {
     private int|false $backgroundColor;
 
     public function __construct() {
-        $this->font = 'arialn.ttf';  // path to the font DejaVu Sans
+        $this->font = 'DejaVuSans.ttf';  // path to the font DejaVu Sans
 
         // Initial creating image
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -38,7 +38,7 @@ class Dialog_2_Img {
     }
 
     public function create($dialog): string {
-        $y = 50;  // start Y coordinate
+        $y = $this->padding;  // start Y coordinate
         $messageMaxWidth = $this->width - 2 * $this->padding; // maximum message width including indents
 
         // Convert the dialog into an array of messages
@@ -74,17 +74,17 @@ class Dialog_2_Img {
             }
 
             // Rendering a message with rounded corners
-            $this->drawRoundedRectangle($x, $y, $x + $messageWidth, $y + $messageHeight, 10, $color);
+            $this->drawRoundedRectangle($x, $y, $x + $messageWidth, $y + $messageHeight, 30, $color);
 
             // Outputting text to an image, taking into account line breaks
             $lineY = $y + $this->textPadding + $this->fontSize;
             foreach (explode("\n", $text) as $line) {
                 imagettftext($this->image, $this->fontSize, 0, $x + $this->textPadding, $lineY, $this->textColor, $this->font, $line);
-                $lineY += $this->fontSize + 5;  // add space between strings
+                $lineY += round($this->fontSize * 1.75);  // add space between strings
             }
 
             // Shifting the Y coordinate for the next message
-            $y += $messageHeight + $this->lineHeight;
+            $y += $messageHeight + $this->textPadding;
         }
 
         // Generate random image name
@@ -167,7 +167,7 @@ class Dialog_2_Img {
             }
         }
 
-        $inputBoxHeight = 50;  // Height of the input box at the bottom
+        $inputBoxHeight = 120;  // Height of the input box at the bottom
         $textSpeed = 2;  // Number of characters per frame
         $typingDelay = 10;  // Delay between typing frames
 
@@ -178,7 +178,7 @@ class Dialog_2_Img {
 
             // If it's the user's message, simulate typing
             if ($isUserMessage) {
-                $text = $messages[$i - 1]['text'];
+                $text = $messages[$i - 1]['text'] . ' ';
                 $currentText = '';
 
                 // Typing simulation by adding one character at a time
@@ -246,7 +246,7 @@ class Dialog_2_Img {
         $this->render_messages($dialog, $y);
 
         // Draw the rounded input box at the bottom
-        $inputBoxY = $this->height;
+        $inputBoxY = round($this->height * .9);
         $inputBoxColor = imagecolorallocate($this->image, 255, 255, 255);  // White background for input box
         $borderColor = imagecolorallocate($this->image, 200, 200, 200);  // Light grey border for the input box
 
