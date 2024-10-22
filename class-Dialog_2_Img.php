@@ -8,8 +8,8 @@
  */
 
 class Dialog_2_Img {
-    private int $width = 810;
-    private int $height = 1080;
+    private int $width = 1080;
+    private int $height = 1920;
     private int $padding = 80;  // Message margins from edges
     private string $font;
     private int $fontSize = 32;
@@ -37,9 +37,26 @@ class Dialog_2_Img {
         imagefill($this->image, 0, 0, $this->backgroundColor);
     }
 
-    public function create($dialog): string {
-        $y = $this->padding;  // start Y coordinate
-        $messageMaxWidth = $this->width - 2 * $this->padding; // maximum message width including indents
+    public function create($dialog, $backgroundImagePath = './tg-bg.jpg'): string {
+        // Load the background image
+        $background = imagecreatefromjpeg($backgroundImagePath);
+        if (!$background) {
+            throw new Exception('Failed to load the background image.');
+        }
+
+        // Get the dimensions of the background image
+        $this->width = imagesx($background);
+        $this->height = imagesy($background);
+
+        // Create a new image based on the background
+        $this->image = imagecreatetruecolor($this->width, $this->height);
+
+        // Copy the background onto the working image
+        imagecopy($this->image, $background, 0, 0, 0, 0, $this->width, $this->height);
+
+        // Initial Y coordinate
+        $y = $this->padding;
+        $messageMaxWidth = $this->width - 2 * $this->padding;
 
         // Convert the dialog into an array of messages
         $lines = explode("\n", $dialog);
@@ -96,9 +113,11 @@ class Dialog_2_Img {
 
         // Free memory
         imagedestroy($this->image);
+        imagedestroy($background);
 
         return $filePath;  // Return the path to the created image
     }
+
 
     /**
      * Function for drawing rounded corners
