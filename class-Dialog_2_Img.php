@@ -77,7 +77,6 @@ class Dialog_2_Img {
             // Message coordinates and dimensions
             $textWidth = $box[2] - $box[0];
             $textHeight = $box[1] - $box[7];
-
             $messageWidth = $textWidth + 2 * $this->textPadding;
             $messageHeight = $textHeight + 2 * $this->textPadding;
 
@@ -92,6 +91,24 @@ class Dialog_2_Img {
 
             // Rendering a message with rounded corners
             $this->drawRoundedRectangle($x, $y, $x + $messageWidth, $y + $messageHeight, 30, $color);
+
+            // Add the "tail" to the message
+            if ($message['user'] == 'me') {
+                // Right tail for "me" messages
+                $tail = [
+                    $x + $messageWidth - 20, $y + $messageHeight - 40,  // Top point of the tail
+                    $x + $messageWidth + 30, $y + $messageHeight - 20,  // Bottom right point
+                    $x + $messageWidth - 20, $y + $messageHeight,   // Bottom left point
+                ];
+            } else {
+                // Left tail for "other" messages
+                $tail = [
+                    $x + 20, $y + $messageHeight - 40,                   // Top point of the tail
+                    $x - 30, $y + $messageHeight - 20,                   // Bottom left point
+                    $x + 20, $y + $messageHeight                   // Bottom right point
+                ];
+            }
+            imagefilledpolygon($this->image, $tail, $color);  // Draw the tail
 
             // Outputting text to an image, taking into account line breaks
             $lineY = $y + $this->textPadding + $this->fontSize;
