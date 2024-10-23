@@ -12,8 +12,8 @@ class Dialog_2_Img {
     private int $height = 1920;
     private int $padding = 80;  // Message margins from edges
     private string $font;
-    private int $fontSize = 32;
-    private int $textPadding = 30;
+    private int $fontSize = 40;
+    private int $textPadding = 50;
     private int $lineHeight = 50;  // distance between messages
     private $image;
     private int|false $myMessageColor;
@@ -39,20 +39,23 @@ class Dialog_2_Img {
 
     public function create($dialog, $backgroundImagePath = './tg-bg.jpg'): string {
         // Load the background image
-        $background = imagecreatefromjpeg($backgroundImagePath);
-        if (!$background) {
-            throw new Exception('Failed to load the background image.');
+        if (file_exists($backgroundImagePath)) {
+            $background = imagecreatefromjpeg($backgroundImagePath);
+        } else {
+            $background = false;
         }
 
-        // Get the dimensions of the background image
-        $this->width = imagesx($background);
-        $this->height = imagesy($background);
+        if ($background) {
+            // Get the dimensions of the background image
+            $this->width = imagesx($background);
+            $this->height = imagesy($background);
 
-        // Create a new image based on the background
-        $this->image = imagecreatetruecolor($this->width, $this->height);
+            // Create a new image based on the background
+            $this->image = imagecreatetruecolor($this->width, $this->height);
 
-        // Copy the background onto the working image
-        imagecopy($this->image, $background, 0, 0, 0, 0, $this->width, $this->height);
+            // Copy the background onto the working image
+            imagecopy($this->image, $background, 0, 0, 0, 0, $this->width, $this->height);
+        }
 
         // Initial Y coordinate
         $y = $this->padding;
@@ -130,7 +133,9 @@ class Dialog_2_Img {
 
         // Free memory
         imagedestroy($this->image);
-        imagedestroy($background);
+        if ($background) {
+            imagedestroy($background);
+        }
 
         return $filePath;  // Return the path to the created image
     }
