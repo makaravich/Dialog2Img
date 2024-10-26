@@ -1,160 +1,200 @@
 <?php
 
 /**
- * It is a PHP class designed to generate images that simulate chat screenshots from a messenger.
- * The class takes a text-based dialogue as input, where each message starts on a new line,
- * and the other party's messages start with an asterisk (*).
- * The output is an image with rounded-corner message bubbles styled for both users, saved with a unique file name.
+ * Class Dialog_2_Img
+ *
+ * This PHP class generates images that simulate chat screenshots from a messenger.
+ * It takes a text-based dialogue as input, where each line represents a message.
+ * Messages from other users start with an asterisk (*), which the class uses to distinguish
+ * them from messages from the main user.
+ *
+ * The output is an image with message bubbles styled for both users, saved as a PNG file.
+ * The appearance and layout can be customized through an array of parameters passed to the constructor.
  */
+class Dialog_2_Img
+{
+    private int $width; // Width of the image
+    private int $height; // Height of the image
+    private int $padding; // Padding from the image edges
+    private string $font; // Path to the font file
+    private int $fontSize; // Font size for message text
+    private int $textPadding; // Padding around the text within message bubbles
+    private int $lineHeight; // Space between messages
+    private $image; // The image resource
+    private int|false $myMessageColor; // Color for user's messages
+    private int|false $otherMessageColor; // Color for other user's messages
+    private int|false $textColor; // Color for text
+    private int|false $backgroundColor; // Background color of the image
 
-class Dialog_2_Img {
-    private int $width = 1080;
-    private int $height = 1920;
-    private int $padding = 80;  // Message margins from edges
-    private string $font;
-    private int $fontSize = 40;
-    private int $textPadding = 50;
-    private int $lineHeight = 50;  // distance between messages
-    private $image;
-    private int|false $myMessageColor;
-    private int|false $otherMessageColor;
-    private int|false $textColor;
-    private int|false $backgroundColor;
-
-    public function __construct()
+    /**
+     * Constructor for Dialog_2_Img
+     *
+     * Initializes the class properties based on provided configuration parameters or defaults,
+     * and sets up the image canvas with a background color and necessary resources.
+     *
+     * @param array $config Configuration parameters for customizing the image (default: empty array)
+     */
+    public function __construct(array $config = [])
     {
-        $this->font = './DejaVuSans.ttf';  // path to the font DejaVu Sans
+        // Set properties with values from config array or defaults
+        $this->width = $config['width'] ?? 1080;
+        $this->height = $config['height'] ?? 1920;
+        $this->padding = $config['padding'] ?? 80;
+        $this->font = $config['font'] ?? './DejaVuSans.ttf';
+        $this->fontSize = $config['fontSize'] ?? 40;
+        $this->textPadding = $config['textPadding'] ?? 50;
+        $this->lineHeight = $config['lineHeight'] ?? 50;
 
-        // Initial creating image
+        // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
 
-        // Set colors
-        $this->backgroundColor = imagecolorallocate($this->image, 240, 240, 240); // Light-grey background
-        $this->myMessageColor = imagecolorallocate($this->image, 173, 216, 230);  // blue message (from me)
-        $this->otherMessageColor = imagecolorallocate($this->image, 255, 255, 255); // white message (from another)
-        $this->textColor = imagecolorallocate($this->image, 0, 0, 0);  // black text
+        // Set colors based on configuration or default values
+        $this->setColors($config);
 
-        // Set background
+        // Fill the background with the specified background color
         imagefill($this->image, 0, 0, $this->backgroundColor);
     }
 
-    public function create($dialog, $backgroundImagePath = './tg-bg.jpg'): string {
-        // Load the background image
-        if (file_exists($backgroundImagePath)) {
-            $background = imagecreatefromjpeg($backgroundImagePath);
-        } else {
-            $background = false;
-        }
+    /**
+     * Sets colors used in the image based on configuration values or defaults.
+     *
+     * @param array $config Configuration array with color values
+     */
+    private function setColors(array $config): void
+    {
+        $this->backgroundColor = $this->allocateColor($config['backgroundColor'] ?? [240, 240, 240]);
+        $this->myMessageColor = $this->allocateColor($config['myMessageColor'] ?? [173, 216, 230]);
+        $this->otherMessageColor = $this->allocateColor($config['otherMessageColor'] ?? [255, 255, 255]);
+        $this->textColor = $this->allocateColor($config['textColor'] ?? [0, 0, 0]);
+    }
 
-        if ($background) {
-            // Get the dimensions of the background image
-            $this->width = imagesx($background);
-            $this->height = imagesy($background);
-
-            // Create a new image based on the background
-            $this->image = imagecreatetruecolor($this->width, $this->height);
-
-            // Copy the background onto the working image
-            imagecopy($this->image, $background, 0, 0, 0, 0, $this->width, $this->height);
-        }
-
-        // Initial Y coordinate
-        $y = $this->padding;
-        $messageMaxWidth = $this->width - 2 * $this->padding;
-
-        // Convert the dialog into an array of messages
-        $lines = explode("\n", $dialog);
-        $messages = [];
-        foreach ($lines as $line) {
-            if (str_starts_with($line, '*')) {
-                $messages[] = ["user" => "other", "text" => trim(substr($line, 1))];
-            } else {
-                $messages[] = ["user" => "me", "text" => trim($line)];
-            }
-        }
-
-        // Rendering of messages
-        foreach ($messages as $message) {
-            $text = $this->wrapText($message['text'], $messageMaxWidth - 2 * $this->textPadding);  // Breaking text into lines
-            $box = imagettfbbox($this->fontSize, 0, $this->font, $text);  // calculate text size
-
-            // Message coordinates and dimensions
-            $textWidth = $box[2] - $box[0];
-            $textHeight = $box[1] - $box[7];
-
-            $messageWidth = $textWidth + 2 * $this->textPadding;
-            $messageHeight = $textHeight + 2 * $this->textPadding;
-
-            // We define the color and position for each message
-            if ($message['user'] == 'me') {
-                $x = $this->width - $messageWidth - $this->padding;  // on the right for messages from me with an indent
-                $color = $this->myMessageColor;
-            } else {
-                $x = $this->padding;  // on the left for messages from another user
-                $color = $this->otherMessageColor;
-            }
-
-            // Rendering a message with rounded corners
-            $this->drawRoundedRectangle($x, $y, $x + $messageWidth, $y + $messageHeight, 30, $color);
-
-            // Add the "tail" to the message
-            if ($message['user'] == 'me') {
-                // Right tail for "me" messages
-                $tail = [
-                    $x + $messageWidth - 20, $y + $messageHeight - 40,  // Top point of the tail
-                    $x + $messageWidth + 30, $y + $messageHeight - 20,  // Bottom right point
-                    $x + $messageWidth - 20, $y + $messageHeight,   // Bottom left point
-                ];
-            } else {
-                // Left tail for "other" messages
-                $tail = [
-                    $x + 20, $y + $messageHeight - 40,                   // Top point of the tail
-                    $x - 30, $y + $messageHeight - 20,                   // Bottom left point
-                    $x + 20, $y + $messageHeight                   // Bottom right point
-                ];
-            }
-            imagefilledpolygon($this->image, $tail, $color);  // Draw the tail
-
-            // Outputting text to an image, taking into account line breaks
-            $lineY = $y + $this->textPadding + $this->fontSize;
-            foreach (explode("\n", $text) as $line) {
-                imagettftext($this->image, $this->fontSize, 0, $x + $this->textPadding, $lineY, $this->textColor, $this->font, $line);
-                $lineY += round($this->fontSize * 1.75);  // add space between strings
-            }
-
-            // Shifting the Y coordinate for the next message
-            $y += $messageHeight + $this->textPadding;
-        }
-
-        // Generate random image name
-        $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.png';
-        $filePath = './img/' . $randomName;
-
-        // Save image to file
-        imagepng($this->image, $filePath);
-
-        // Free memory
-        imagedestroy($this->image);
-        if ($background) {
-            imagedestroy($background);
-        }
-
-        return $filePath;  // Return the path to the created image
+    /**
+     * Allocates color in the image from RGB values.
+     *
+     * @param array $rgb Array with red, green, and blue values
+     * @return int|false Color identifier or false on failure
+     */
+    private function allocateColor(array $rgb): int|false
+    {
+        return imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]);
     }
 
 
     /**
-     * Function for drawing rounded corners
+     * Creates the chat image based on dialog text and optional background image.
      *
-     * @param $x1
-     * @param $y1
-     * @param $x2
-     * @param $y2
-     * @param $radius
-     * @param $color
-     * @return void
+     * @param string $dialog Text representing the conversation, with each line as a message
+     * @param string $backgroundImagePath Optional path to a background image
+     * @return string Path to the saved image file
      */
-    private function drawRoundedRectangle($x1, $y1, $x2, $y2, $radius, $color): void
+    public function create(string $dialog, string $backgroundImagePath = './tg-bg.jpg'): string
+    {
+        // Load background if specified
+        $this->loadBackground($backgroundImagePath);
+
+        // Parse the dialog text into structured messages
+        $messages = $this->parseDialog($dialog);
+
+        // Render each message in the parsed dialog
+        $this->renderMessages($messages);
+
+        // Save the generated image and return the file path
+        return $this->saveImage();
+    }
+
+    /**
+     * Loads and applies a background image if available.
+     *
+     * @param string $backgroundImagePath Path to the background image file
+     */
+    private function loadBackground(string $backgroundImagePath): void
+    {
+        if (file_exists($backgroundImagePath)) {
+            $background = imagecreatefromjpeg($backgroundImagePath);
+            $this->width = imagesx($background);
+            $this->height = imagesy($background);
+            $this->image = imagecreatetruecolor($this->width, $this->height);
+            imagecopy($this->image, $background, 0, 0, 0, 0, $this->width, $this->height);
+            imagedestroy($background);
+        }
+    }
+
+    /**
+     * Parses the dialog string into an array of message objects.
+     *
+     * @param string $dialog Dialog text with each message on a new line
+     * @return array Array of structured messages with user type and text
+     */
+    private function parseDialog(string $dialog): array
+    {
+        $lines = explode("\n", $dialog);
+        $messages = [];
+        foreach ($lines as $line) {
+            $isOther = str_starts_with($line, '*');
+            $messages[] = [
+                'user' => $isOther ? 'other' : 'me',
+                'text' => trim($isOther ? substr($line, 1) : $line)
+            ];
+        }
+        return $messages;
+    }
+
+    /**
+     * Renders all messages on the image canvas.
+     *
+     * @param array $messages Array of parsed messages
+     */
+    private function renderMessages(array $messages): void
+    {
+        $y = $this->padding;
+        $messageMaxWidth = $this->width - 2 * $this->padding;
+
+        foreach ($messages as $message) {
+            $text = $this->wrapText($message['text'], $messageMaxWidth - 2 * $this->textPadding);
+            [$textWidth, $textHeight] = $this->getTextDimensions($text);
+            $messageWidth = $textWidth + 2 * $this->textPadding;
+            $messageHeight = $textHeight + 2 * $this->textPadding;
+
+            $x = ($message['user'] === 'me')
+                ? $this->width - $messageWidth - $this->padding
+                : $this->padding;
+            $color = ($message['user'] === 'me') ? $this->myMessageColor : $this->otherMessageColor;
+
+            // Draw message bubble with rounded corners
+            $this->drawRoundedRectangle($x, $y, $x + $messageWidth, $y + $messageHeight, 30, $color);
+
+            // Add the "tail" to the message bubble
+            $this->drawMessageTail($x, $y, $messageWidth, $messageHeight, $message['user'], $color);
+
+            // Draw the text inside the bubble
+            $this->drawText($text, $x, $y, $messageHeight);
+            $y += $messageHeight + $this->textPadding;
+        }
+    }
+
+    /**
+     * Calculates the width and height of the text block.
+     *
+     * @param string $text The wrapped text
+     * @return array Array with width and height of the text block
+     */
+    private function getTextDimensions(string $text): array
+    {
+        $box = imagettfbbox($this->fontSize, 0, $this->font, $text);
+        return [$box[2] - $box[0], $box[1] - $box[7]];
+    }
+
+    /**
+     * Draws a rounded rectangle for a message bubble.
+     *
+     * @param int $x1 Starting x-coordinate
+     * @param int $y1 Starting y-coordinate
+     * @param int $x2 Ending x-coordinate
+     * @param int $y2 Ending y-coordinate
+     * @param int $radius Radius of the rounded corners
+     * @param int $color Color identifier for the rectangle
+     */
+    private function drawRoundedRectangle(int $x1, int $y1, int $x2, int $y2, int $radius, int $color): void
     {
         imagefilledrectangle($this->image, $x1 + $radius, $y1, $x2 - $radius, $y2, $color);
         imagefilledrectangle($this->image, $x1, $y1 + $radius, $x2, $y2 - $radius, $color);
@@ -165,29 +205,100 @@ class Dialog_2_Img {
     }
 
     /**
-     * Function for wrapping text to fit the width of the message
+     * Draws text within a message bubble.
      *
-     * @param $text
-     * @param $maxWidth
-     * @return string
+     * @param string $text Text to be drawn
+     * @param int $x x-coordinate of the text
+     * @param int $y y-coordinate of the text
+     * @param int $messageHeight Height of the message bubble
      */
-    private function wrapText($text, $maxWidth): string
+    private function drawText(string $text, int $x, int $y, int $messageHeight): void
+    {
+        $lineY = $y + $this->textPadding + $this->fontSize;
+        foreach (explode("\n", $text) as $line) {
+            imagettftext($this->image, $this->fontSize, 0, $x + $this->textPadding, $lineY, $this->textColor, $this->font, $line);
+            $lineY += $this->fontSize * 1.75;
+        }
+    }
+
+    /**
+     * Wraps text to fit within a specified width.
+     *
+     * @param string $text Original text to wrap
+     * @param int $maxWidth Maximum width for each line
+     * @return string Wrapped text
+     */
+    private function wrapText(string $text, int $maxWidth): string
     {
         $words = explode(' ', $text);
         $wrappedText = '';
         $line = '';
         foreach ($words as $word) {
             $testLine = $line . ' ' . $word;
-            $box = imagettfbbox($this->fontSize, 0, $this->font, trim($testLine));
-            $lineWidth = $box[2] - $box[0];
-            if ($lineWidth > $maxWidth && !empty($line)) {
+            $lineWidth = $this->getTextWidth($testLine);
+            if ($lineWidth > $maxWidth && $line) {
                 $wrappedText .= trim($line) . "\n";
                 $line = $word;
             } else {
                 $line = $testLine;
             }
         }
-        $wrappedText .= trim($line);
-        return $wrappedText;
+        return $wrappedText . trim($line);
+    }
+
+    /**
+     * Gets the width of a single line of text.
+     *
+     * @param string $text The text line
+     * @return int Width of the text line
+     */
+    private function getTextWidth(string $text): int
+    {
+        $box = imagettfbbox($this->fontSize, 0, $this->font, trim($text));
+        return $box[2] - $box[0];
+    }
+
+    /**
+     * Saves the generated image to a file and returns the file path.
+     *
+     * @return string File path of the saved image
+     */
+    private function saveImage(): string
+    {
+        $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.png';
+        $filePath = './img/' . $randomName;
+        imagepng($this->image, $filePath);
+        imagedestroy($this->image);
+        return $filePath;
+    }
+
+    /**
+     * Draws the "tail" of the message bubble to indicate the speaker.
+     *
+     * @param int $x x-coordinate of the message bubble
+     * @param int $y y-coordinate of the message bubble
+     * @param int $messageWidth Width of the message bubble
+     * @param int $messageHeight Height of the message bubble
+     * @param string $userType Type of user ('me' or 'other')
+     * @param int $color Color identifier for the tail
+     */
+    private function drawMessageTail(int $x, int $y, int $messageWidth, int $messageHeight, string $userType, int $color): void
+    {
+        if ($userType === 'me') {
+            // Right tail for "me" messages
+            $tail = [
+                $x + $messageWidth - 20, $y + $messageHeight - 40,  // Top point of the tail
+                $x + $messageWidth + 30, $y + $messageHeight - 20,  // Bottom right point
+                $x + $messageWidth - 20, $y + $messageHeight,       // Bottom left point
+            ];
+        } else {
+            // Left tail for "other" messages
+            $tail = [
+                $x + 20, $y + $messageHeight - 40,                   // Top point of the tail
+                $x - 30, $y + $messageHeight - 20,                   // Bottom left point
+                $x + 20, $y + $messageHeight                         // Bottom right point
+            ];
+        }
+        imagefilledpolygon($this->image, $tail, 3, $color);  // Draw the tail
     }
 }
