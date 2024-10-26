@@ -8,12 +8,12 @@
  */
 
 class Dialog_2_Img {
-    private int $width = 810;
-    private int $height = 1080;
+    private int $width = 1080;
+    private int $height = 1920;
     private int $padding = 80;  // Message margins from edges
     private string $font;
-    private int $fontSize = 32;
-    private int $textPadding = 30;
+    private int $fontSize = 40;
+    private int $textPadding = 50;
     private int $lineHeight = 50;  // distance between messages
     private $image;
     private int|false $myMessageColor;
@@ -21,8 +21,9 @@ class Dialog_2_Img {
     private int|false $textColor;
     private int|false $backgroundColor;
 
-    public function __construct() {
-        $this->font = 'DejaVuSans.ttf';  // path to the font DejaVu Sans
+    public function __construct()
+    {
+        $this->font = './DejaVuSans.ttf';  // path to the font DejaVu Sans
 
         // Initial creating image
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -37,9 +38,29 @@ class Dialog_2_Img {
         imagefill($this->image, 0, 0, $this->backgroundColor);
     }
 
-    public function create($dialog): string {
-        $y = $this->padding;  // start Y coordinate
-        $messageMaxWidth = $this->width - 2 * $this->padding; // maximum message width including indents
+    public function create($dialog, $backgroundImagePath = './tg-bg.jpg'): string {
+        // Load the background image
+        if (file_exists($backgroundImagePath)) {
+            $background = imagecreatefromjpeg($backgroundImagePath);
+        } else {
+            $background = false;
+        }
+
+        if ($background) {
+            // Get the dimensions of the background image
+            $this->width = imagesx($background);
+            $this->height = imagesy($background);
+
+            // Create a new image based on the background
+            $this->image = imagecreatetruecolor($this->width, $this->height);
+
+            // Copy the background onto the working image
+            imagecopy($this->image, $background, 0, 0, 0, 0, $this->width, $this->height);
+        }
+
+        // Initial Y coordinate
+        $y = $this->padding;
+        $messageMaxWidth = $this->width - 2 * $this->padding;
 
         // Convert the dialog into an array of messages
         $lines = explode("\n", $dialog);
@@ -76,6 +97,24 @@ class Dialog_2_Img {
             // Rendering a message with rounded corners
             $this->drawRoundedRectangle($x, $y, $x + $messageWidth, $y + $messageHeight, 30, $color);
 
+            // Add the "tail" to the message
+            if ($message['user'] == 'me') {
+                // Right tail for "me" messages
+                $tail = [
+                    $x + $messageWidth - 20, $y + $messageHeight - 40,  // Top point of the tail
+                    $x + $messageWidth + 30, $y + $messageHeight - 20,  // Bottom right point
+                    $x + $messageWidth - 20, $y + $messageHeight,   // Bottom left point
+                ];
+            } else {
+                // Left tail for "other" messages
+                $tail = [
+                    $x + 20, $y + $messageHeight - 40,                   // Top point of the tail
+                    $x - 30, $y + $messageHeight - 20,                   // Bottom left point
+                    $x + 20, $y + $messageHeight                   // Bottom right point
+                ];
+            }
+            imagefilledpolygon($this->image, $tail, $color);  // Draw the tail
+
             // Outputting text to an image, taking into account line breaks
             $lineY = $y + $this->textPadding + $this->fontSize;
             foreach (explode("\n", $text) as $line) {
@@ -89,16 +128,20 @@ class Dialog_2_Img {
 
         // Generate random image name
         $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.png';
-        $filePath = __DIR__ . '/img/' . $randomName;
+        $filePath = './img/' . $randomName;
 
         // Save image to file
         imagepng($this->image, $filePath);
 
         // Free memory
         imagedestroy($this->image);
+        if ($background) {
+            imagedestroy($background);
+        }
 
         return $filePath;  // Return the path to the created image
     }
+
 
     /**
      * Function for drawing rounded corners
@@ -111,7 +154,8 @@ class Dialog_2_Img {
      * @param $color
      * @return void
      */
-    private function drawRoundedRectangle($x1, $y1, $x2, $y2, $radius, $color): void {
+    private function drawRoundedRectangle($x1, $y1, $x2, $y2, $radius, $color): void
+    {
         imagefilledrectangle($this->image, $x1 + $radius, $y1, $x2 - $radius, $y2, $color);
         imagefilledrectangle($this->image, $x1, $y1 + $radius, $x2, $y2 - $radius, $color);
         imagefilledellipse($this->image, $x1 + $radius, $y1 + $radius, $radius * 2, $radius * 2, $color);
@@ -127,7 +171,8 @@ class Dialog_2_Img {
      * @param $maxWidth
      * @return string
      */
-    private function wrapText($text, $maxWidth): string {
+    private function wrapText($text, $maxWidth): string
+    {
         $words = explode(' ', $text);
         $wrappedText = '';
         $line = '';
