@@ -41,7 +41,7 @@ class Dialog_2_Img {
         $this->font = $config['font'] ?? './DejaVuSans.ttf';
         $this->fontSize = $config['fontSize'] ?? 40;
         $this->textPadding = $config['textPadding'] ?? 50;
-        $this->lineHeight = $config['lineHeight'] ?? 50;
+        $this->lineHeight = $config['lineHeight'] ?? 20;
 
         // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -172,7 +172,7 @@ class Dialog_2_Img {
 
             // Draw the text inside the bubble
             $this->drawText($text, $x, $y, $messageHeight);
-            $y += $messageHeight + $this->textPadding;
+            $y += $messageHeight + $this->lineHeight;
         }
     }
 
