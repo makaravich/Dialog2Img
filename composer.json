@@ -1,0 +1,17 @@
+{
+  "name": "makaravich/dialog2img",
+  "description": "This is a PHP class designed to generate images that simulate chat screenshots from a messenger.",
+  "type": "library",
+  "require": {
+    "php": ">=8.0",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "\\": "src/"
+    },
+    "classmap": [
+      "src/"
+    ]
+  }
+}
