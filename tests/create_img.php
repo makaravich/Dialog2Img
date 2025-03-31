@@ -12,7 +12,7 @@ $dialog = <<<DIALOG
 DIALOG;
 
 // Создаем экземпляр класса
-$image_gen = new Dialog_2_Img(['imagesPath'=>'d:\temp\images\1']);
+$image_gen = new Dialog_2_Img(['imagesPath'=>'./img']);
 
 // Генерируем анимированный GIF и сохраняем его в папке img
 
