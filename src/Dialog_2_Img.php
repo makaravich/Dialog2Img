@@ -33,8 +33,7 @@ class Dialog_2_Img {
      *
      * @param array $config Configuration parameters for customizing the image (default: empty array)
      */
-    public function __construct(array $config = [])
-    {
+    public function __construct(array $config = []) {
         // Set properties with values from config array or defaults
         $this->width = $config['width'] ?? 1080;
         $this->height = $config['height'] ?? 1920;
@@ -43,7 +42,7 @@ class Dialog_2_Img {
         $this->fontSize = $config['fontSize'] ?? 40;
         $this->textPadding = $config['textPadding'] ?? 50;
         $this->lineHeight = $config['lineHeight'] ?? 20;
-        $this->imagesPath = $config['imagesPath'] ?? '.\\';
+        $this->imagesPath = $config['imagesPath'] ? rtrim($config['imagesPath'], '/\\') . DIRECTORY_SEPARATOR : '.' . DIRECTORY_SEPARATOR;
 
         // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
