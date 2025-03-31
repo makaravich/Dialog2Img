@@ -23,6 +23,7 @@ class Dialog_2_Img {
     private int|false $myMessageColor; // Color for user's messages
     private int|false $otherMessageColor; // Color for other user's messages
     private int|false $textColor; // Color for text
+    private string $imagesPath; // Path to save images
 
     /**
      * Constructor for Dialog_2_Img
@@ -38,10 +39,11 @@ class Dialog_2_Img {
         $this->width = $config['width'] ?? 1080;
         $this->height = $config['height'] ?? 1920;
         $this->padding = $config['padding'] ?? 80;
-        $this->font = $config['font'] ?? './DejaVuSans.ttf';
+        $this->font = $config['font'] ?? '../fonts/DejaVuSans.ttf';
         $this->fontSize = $config['fontSize'] ?? 40;
         $this->textPadding = $config['textPadding'] ?? 50;
         $this->lineHeight = $config['lineHeight'] ?? 20;
+        $this->imagesPath = $config['imagesPath'] ?? '.\\';
 
         // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -264,7 +266,14 @@ class Dialog_2_Img {
      */
     private function saveImage(): string {
         $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.png';
-        $filePath = './img/' . $randomName;
+
+        // Create directory if doesn't exist
+        if (!is_dir($this->imagesPath)) {
+            mkdir($this->imagesPath, 0777, true);
+        }
+
+        $filePath = $this->imagesPath . $randomName;
+        echo "File path: $filePath";
         imagepng($this->image, $filePath);
         imagedestroy($this->image);
         return $filePath;

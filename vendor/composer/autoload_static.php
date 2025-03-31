@@ -22,7 +22,7 @@ class ComposerStaticInit9adbc4dfe682c038fbeeda4576db39ba
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Dialog_2_Img' => __DIR__ . '/../..' . '/src/class-Dialog_2_Img.php',
+        'Dialog_2_Img' => __DIR__ . '/../..' . '/src/Dialog_2_Img.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

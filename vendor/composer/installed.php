@@ -3,7 +3,7 @@
         'name' => 'makaravich/dialog2img',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '6a8fad35cdb86f72c595224b1fecffc36acca530',
+        'reference' => 'e6000c486f843bb5cce67dd1ec1d8655e399e208',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'makaravich/dialog2img' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '6a8fad35cdb86f72c595224b1fecffc36acca530',
+            'reference' => 'e6000c486f843bb5cce67dd1ec1d8655e399e208',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

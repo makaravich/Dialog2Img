@@ -4,7 +4,6 @@
 /.osp
 /classes
 /page
-/tests
 
 # Fonts
 *.ttf
@@ -12,6 +11,3 @@
 # Some files
 index.php
 creds.*
-
-# Tests
-test.php

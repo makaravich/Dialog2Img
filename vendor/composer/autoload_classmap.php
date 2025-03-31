@@ -7,5 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'Dialog_2_Img' => $baseDir . '/src/class-Dialog_2_Img.php',
+    'Dialog_2_Img' => $baseDir . '/src/Dialog_2_Img.php',
 );
