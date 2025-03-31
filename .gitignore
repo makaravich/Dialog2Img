@@ -5,9 +5,6 @@
 /classes
 /page
 
-# Fonts
-*.ttf
-
 # Some files
 index.php
 creds.*
