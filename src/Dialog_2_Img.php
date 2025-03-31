@@ -38,13 +38,15 @@ class Dialog_2_Img {
         $this->width = $config['width'] ?? 1080;
         $this->height = $config['height'] ?? 1920;
         $this->padding = $config['padding'] ?? 80;
-        $this->font = $config['font'] ?? '../fonts/DejaVuSans.ttf';
+        $this->font = $config['font'] ?? dirname(__DIR__) . '/fonts/DejaVuSans.ttf';
         $this->fontSize = $config['fontSize'] ?? 40;
         $this->textPadding = $config['textPadding'] ?? 50;
         $this->lineHeight = $config['lineHeight'] ?? 20;
         $this->imagesPath = !empty($config['imagesPath']) ?
-            rtrim($config['imagesPath'] , '/\\') . DIRECTORY_SEPARATOR :
+            rtrim($config['imagesPath'], '/\\') . DIRECTORY_SEPARATOR :
             realpath('.' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+        error_log("Font Path: $this->font");
 
         // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
