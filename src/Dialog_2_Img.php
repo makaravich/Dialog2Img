@@ -42,7 +42,9 @@ class Dialog_2_Img {
         $this->fontSize = $config['fontSize'] ?? 40;
         $this->textPadding = $config['textPadding'] ?? 50;
         $this->lineHeight = $config['lineHeight'] ?? 20;
-        $this->imagesPath = $config['imagesPath'] ? rtrim($config['imagesPath'], '/\\') . DIRECTORY_SEPARATOR : '.' . DIRECTORY_SEPARATOR;
+        $this->imagesPath = !empty($config['imagesPath']) ?
+            rtrim($config['imagesPath'] , '/\\') . DIRECTORY_SEPARATOR :
+            realpath('.' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -272,7 +274,7 @@ class Dialog_2_Img {
         }
 
         $filePath = $this->imagesPath . $randomName;
-        echo "File path: $filePath";
+
         imagepng($this->image, $filePath);
         imagedestroy($this->image);
         return $filePath;
@@ -304,6 +306,6 @@ class Dialog_2_Img {
                 $x + 20, $y + $messageHeight                         // Bottom right point
             ];
         }
-        imagefilledpolygon($this->image, $tail, 3, $color);  // Draw the tail
+        imagefilledpolygon($this->image, $tail, $color);  // Draw the tail
     }
 }
