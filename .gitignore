@@ -4,6 +4,7 @@
 /.osp
 /classes
 /page
+/media/output
 
 # Some files
 index.php
