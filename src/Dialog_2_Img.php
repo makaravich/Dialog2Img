@@ -364,7 +364,7 @@ class Dialog_2_Img
         if (filesize($videoTmp) === 0 || filesize($imageTmp) === 0) {
             if ($this->debugMode) {
                 error_log('Error: Video or image haven\'t been loaded.');
-                error_log('Video File: $videoUrl');
+                error_log("Video File: $videoUrl");
                 error_log("Image File: $imageUrl");
             }
             return false;
@@ -378,7 +378,7 @@ class Dialog_2_Img
 
         // Debug mode
         if ($this->debugMode) {
-            $logPath = '../tests/ffmpeg_debug.log';
+            $logPath = dirname(__DIR__) . '/tests/ffmpeg_debug.log';
             $cmd .= escapeshellarg($outputPath) . " > " . escapeshellarg($logPath) . " 2>&1";
         }
 
@@ -406,7 +406,7 @@ class Dialog_2_Img
     public function createVideo(string $dialog): string
     {
         $image = $this->create($dialog);
-        $video_path = '..\media\video.mp4';
+        $video_path = dirname(__DIR__) . '/media/video.mp4';
 
         if ($result = $this->overlayImageOnVideo($image, $video_path)) {
             return $result;
