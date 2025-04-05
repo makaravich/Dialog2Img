@@ -362,9 +362,11 @@ class Dialog_2_Img
 
         // Check: if the files loaded
         if (filesize($videoTmp) === 0 || filesize($imageTmp) === 0) {
-            echo "Error: Video or image haven't been loaded.\n";
-            echo "Video File: $videoUrl \n";
-            echo "Image File: $imageUrl \n";
+            if ($this->debugMode) {
+                error_log('Error: Video or image haven\'t been loaded.');
+                error_log('Video File: $videoUrl');
+                error_log("Image File: $imageUrl");
+            }
             return false;
         }
 
@@ -388,7 +390,7 @@ class Dialog_2_Img
         unlink($imageTmp);
 
         if ($returnVar !== 0) {
-            echo "FFmpeg Error. See ffmpeg_debug.log\n";
+            error_log('FFmpeg Error. See ffmpeg_debug.log');
             return false;
         } else {
             return $outputPath;
