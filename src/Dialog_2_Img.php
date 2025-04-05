@@ -25,6 +25,7 @@ class Dialog_2_Img
     private int|false $otherMessageColor; // Color for other user's messages
     private int|false $textColor; // Color for text
     private string $imagesPath; // Path to save images
+    private string $debugMode; // Path to save images
 
     /**
      * Constructor for Dialog_2_Img
@@ -37,6 +38,7 @@ class Dialog_2_Img
     public function __construct(array $config = [])
     {
         // Set properties with values from config array or defaults
+        $this->debugMode = $config['debugMode'] ?? false;
         $this->width = $config['width'] ?? 1080;
         $this->height = $config['height'] ?? 1920;
         $this->padding = $config['padding'] ?? 80;
@@ -48,7 +50,9 @@ class Dialog_2_Img
             rtrim($config['imagesPath'], '/\\') . DIRECTORY_SEPARATOR :
             realpath('.' . DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
-        error_log("Font Path: $this->font");
+        if ($this->debugMode) {
+            error_log("Font Path: $this->font");
+        }
 
         // Create an initial blank image
         $this->image = imagecreatetruecolor($this->width, $this->height);
@@ -282,18 +286,29 @@ class Dialog_2_Img
      */
     private function saveImage(): string
     {
-        $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.png';
+        $filePath = $this->generateRandomFileName('png');
+
+        imagepng($this->image, $filePath);
+        imagedestroy($this->image);
+        return $filePath;
+    }
+
+    /**
+     * Returns random file name based on its extension
+     *
+     * @param $extension
+     * @return string
+     */
+    private function generateRandomFileName($extension): string
+    {
+        $randomName = uniqid() . '_' . substr(md5(mt_rand()), 0, 5) . '.' . $extension;
 
         // Create directory if doesn't exist
         if (!is_dir($this->imagesPath)) {
             mkdir($this->imagesPath, 0777, true);
         }
 
-        $filePath = $this->imagesPath . $randomName;
-
-        imagepng($this->image, $filePath);
-        imagedestroy($this->image);
-        return $filePath;
+        return $this->imagesPath . $randomName;
     }
 
     /**
@@ -326,7 +341,14 @@ class Dialog_2_Img
         imagefilledpolygon($this->image, $tail, $color);  // Draw the tail
     }
 
-    public function overlayImageOnVideo(string $videoUrl, string $imageUrl, string $outputPath): bool
+    /**
+     * Overlays image over video
+     *
+     * @param string $videoUrl
+     * @param string $imageUrl
+     * @return string|bool
+     */
+    public function overlayImageOnVideo(string $videoUrl, string $imageUrl): string|bool
     {
         // Temporary files
         $videoTmp = tempnam(sys_get_temp_dir(), 'vid_') . '.mp4';
@@ -346,9 +368,17 @@ class Dialog_2_Img
             return false;
         }
 
+        $outputPath = $this->generateRandomFileName('mp4');
+
         // FFmpeg command for overlaying the image
-        // overlay=10:10 — coordinates for overlay (10px offset from the left and top)
-        $cmd = "ffmpeg -i {$videoTmp} -i {$imageTmp} -filter_complex \"[1:v][0:v] overlay=10:10\" -codec:a copy -y " . escapeshellarg($outputPath);
+        // overlay=0:0 — coordinates for overlay (10px offset from the left and top)
+        $cmd = "ffmpeg -i {$videoTmp} -i {$imageTmp} -filter_complex \"[1:v][0:v] overlay=0:0\" -codec:a copy -y ";
+
+        // Debug mode
+        if ($this->debugMode) {
+            $logPath = '../tests/ffmpeg_debug.log';
+            $cmd .= escapeshellarg($outputPath) . " > " . escapeshellarg($logPath) . " 2>&1";
+        }
 
         // Execute the command
         exec($cmd, $output, $returnVar);
@@ -359,19 +389,25 @@ class Dialog_2_Img
 
         if ($returnVar !== 0) {
             echo "FFmpeg Error. See ffmpeg_debug.log\n";
+            return false;
+        } else {
+            return $outputPath;
         }
-
-        return $returnVar === 0;
     }
 
+    /**
+     * Creates a video with chat meme
+     *
+     * @param string $dialog
+     * @return string
+     */
     public function createVideo(string $dialog): string
     {
         $image = $this->create($dialog);
         $video_path = '..\media\video.mp4';
-        $output_path = '..\media\output\clip.mp4';
 
-        if ($this->overlayImageOnVideo($image, $video_path, $output_path)) {
-            return $output_path;
+        if ($result = $this->overlayImageOnVideo($image, $video_path)) {
+            return $result;
         } else {
             return '';
         }

@@ -12,7 +12,12 @@ Has it become colorful now?
 DIALOG;
 
 // Create an instance of the class
-$image_gen = new Dialog_2_Img(['imagesPath' => '../media/output/']);
+$image_gen = new Dialog_2_Img(
+    [
+        'imagesPath' => '../media/output/',
+        'debugMode' => true,
+    ]
+);
 
 // Generate a video
 $outputPath = $image_gen->createVideo($dialog);

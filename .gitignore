@@ -5,6 +5,7 @@
 /classes
 /page
 /media/output
+*.log
 
 # Some files
 index.php
