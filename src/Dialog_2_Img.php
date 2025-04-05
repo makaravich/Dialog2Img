@@ -390,6 +390,7 @@ class Dialog_2_Img
         unlink($imageTmp);
 
         if ($returnVar !== 0) {
+            error_log("{FFmpeg DEBUG}: \n" . print_r($output, true));
             error_log('FFmpeg Error. See ffmpeg_debug.log');
             return false;
         } else {
